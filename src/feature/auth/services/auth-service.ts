@@ -300,4 +300,48 @@ export class AuthService {
 
     return true;
   }
+
+  async updateTokensForRequestRefreshToken(refreshToken: string) {
+    const result = await this.tokenJwtService.checkRefreshToken(refreshToken);
+
+    /*  из токена достал два значения и одновременно по двум этим значениям ищу в базе один документ ЕСЛИ ДОКУМЕНТ 
+    НАШОЛСЯ то новую дату создания РЕФРЕШТОКЕНА надо в 
+    найденый документ в базу записать 
+    и два новых токена создаю и отдаю на фронт  */
+
+    if (!result) return null;
+
+    const { deviceId, issuedAtRefreshToken } = result;
+
+    const device = await this.securityDeviceRepository.findDeviceByIdAndDate(
+      deviceId,
+      issuedAtRefreshToken,
+    );
+
+    if (!device) return null;
+
+    const userId = device.userId;
+
+    const newAccessToken = await this.tokenJwtService.createAccessToken(userId);
+
+    const newResultRefreshToken =
+      await this.tokenJwtService.createRefreshToken(deviceId);
+
+    const newIssuedAtRefreshToken = newResultRefreshToken.issuedAtRefreshToken;
+
+    const newRefreshToken = newResultRefreshToken.refreshToken;
+
+    /*в базу данных сохраняю-ИЗМЕНЯЮ ДАТУ СОЗДАНИЯ РЕФРЕШТОКЕНА
+    ДЛЯ ДОКУМЕНТА С КОТОРЫМ УЖЕ РАБОТАЛ_КОТОРЫЙ УЖЕ СУЩЕСТВУЕТ
+    В БАЗЕ ДАННЫХ*/
+
+    device.issuedAtRefreshToken = newIssuedAtRefreshToken;
+
+    const updateDevice: SecurityDeviceDocument =
+      await this.securityDeviceRepository.save(device);
+
+    if (!updateDevice) return null;
+
+    return { newAccessToken, newRefreshToken };
+  }
 }

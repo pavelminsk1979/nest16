@@ -9,6 +9,10 @@ import {
   LikeStatusForComment,
   LikeStatusForCommentDocument,
 } from '../like-status-for-comment/domain/domain-like-status-for-comment';
+import {
+  SecurityDevice,
+  SecurityDeviceDocument,
+} from '../security-device/domains/domain-security-device';
 
 @Controller('testing')
 export class TestController {
@@ -19,6 +23,8 @@ export class TestController {
     @InjectModel(Comment.name) private commentModel: Model<CommentDocument>,
     @InjectModel(LikeStatusForComment.name)
     private LikeStatusForCommentModel: Model<LikeStatusForCommentDocument>,
+    @InjectModel(SecurityDevice.name)
+    private securityDeviceModel: Model<SecurityDeviceDocument>,
   ) {}
 
   @HttpCode(HttpStatus.NO_CONTENT)
@@ -29,6 +35,8 @@ export class TestController {
     await this.userModel.deleteMany({});
     await this.commentModel.deleteMany({});
     await this.LikeStatusForCommentModel.deleteMany({});
+    await this.LikeStatusForCommentModel.deleteMany({});
+    await this.securityDeviceModel.deleteMany({});
     return;
   }
 }

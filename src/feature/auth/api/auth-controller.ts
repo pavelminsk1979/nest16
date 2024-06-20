@@ -17,7 +17,7 @@ import { RegistrationConfirmationInputModel } from './pipes/registration-comfirm
 import { RegistrationEmailResendingInputModel } from './pipes/registration-email-resending-input-model';
 import { PasswordRecoveryInputModel } from './pipes/password-recovery-input-model';
 import { NewPasswordInputModel } from './pipes/new-password-input-model';
-import { Response } from 'express';
+import { Response, Request } from 'express';
 
 @Controller('auth')
 export class AuthController {
@@ -162,17 +162,31 @@ export class AuthController {
 
   @HttpCode(HttpStatus.OK)
   @Post('refresh-token')
-  async handleRefreshToken(@Req() req) {
-    debugger;
-    const refreshToken = req.cookies.refreshToken;
+  async handleRefreshToken(
+    @Req() request: Request,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const refreshToken: string = request.cookies.refreshToken;
 
-    return { token: refreshToken };
+    const result: { newAccessToken: string; newRefreshToken: string } | null =
+      await this.authService.updateTokensForRequestRefreshToken(refreshToken);
+
+    if (result) {
+      /* { httpOnly: true, secure: true } - это опции для cookie:
+         httpOnly: true означает, что cookie будет доступно только для
+          HTTP-запросов, а не для JavaScript-скриптов на клиенте.
+         secure: true означает, что cookie будет передаваться только по
+          защищенному (HTTPS) соединению.*/
+      response.cookie('refreshToken', result.newRefreshToken, {
+        httpOnly: true,
+        secure: true,
+      });
+      return { accessToken: result.newAccessToken };
+    } else {
+      /* (401 Unauthorized). Это означает, что клиент не авторизован для доступа к запрашиваемому ресурсу*/
+      throw new UnauthorizedException(
+        "user didn't login:andpoint-post,url-auth/login",
+      );
+    }
   }
 }
-
-//.set('Cookie', `refreshToken=${refreshTokenFIRST}`)
-/*
-response.cookie('refreshToken', result.refreshToken, {
-  httpOnly: true,
-  secure: true,
-});*/

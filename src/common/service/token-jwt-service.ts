@@ -61,4 +61,26 @@ export class TokenJwtService {
       return null;
     }
   }
+
+  async checkRefreshToken(
+    refreshToken: string,
+  ): Promise<{ deviceId: string; issuedAtRefreshToken: string } | null> {
+    try {
+      debugger;
+      const secretRefreshToken = this.configService.get(
+        'authSettings.RefreshTOKEN_SECRET',
+        { infer: true },
+      );
+
+      const result = (await jwt.verify(refreshToken, secretRefreshToken)) as {
+        deviceId: string;
+        issuedAtRefreshToken: string;
+      };
+
+      return result;
+    } catch (error) {
+      //console.log(' FILE token-jwt-service.ts' + error);
+      return null;
+    }
+  }
 }

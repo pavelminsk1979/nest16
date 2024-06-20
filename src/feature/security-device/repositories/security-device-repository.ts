@@ -16,7 +16,11 @@ export class SecurityDeviceRepository {
     private securityDeviceModel: Model<SecurityDeviceDocument>,
   ) {}
 
-  async save(newSecurityDevice: SecurityDeviceDocument) {
-    return newSecurityDevice.save();
+  async save(device: SecurityDeviceDocument) {
+    return device.save();
+  }
+
+  async findDeviceByIdAndDate(deviceId: string, issuedAtRefreshToken: string) {
+    return this.securityDeviceModel.findOne({ deviceId, issuedAtRefreshToken });
   }
 }

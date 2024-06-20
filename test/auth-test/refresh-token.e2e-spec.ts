@@ -3,6 +3,7 @@ import { AppModule } from '../../src/app.module';
 import { applyAppSettings } from '../../src/settings/apply-app-settings';
 import request from 'supertest';
 import { UserManagerForTest } from '../utils/user-manager-for-test';
+import cookieParser from 'cookie-parser';
 
 describe('tests for andpoint auth/refresh-token', () => {
   let app;
@@ -15,6 +16,8 @@ describe('tests for andpoint auth/refresh-token', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+
+    app.use(cookieParser());
 
     applyAppSettings(app);
 
@@ -60,11 +63,13 @@ describe('tests for andpoint auth/refresh-token', () => {
           включая куку 'refreshToken'.*/
     const allCookies = res.headers['set-cookie'];
 
-    //console.log(allCookies[0].split(';')[0]);
+    const refrToken = allCookies[0].split(';')[0];
 
-    //console.log(res.body);
+    refreshToken = refrToken.split('=')[1];
 
-    refreshToken = res.body;
+    //console.log(res.body.accessToken);
+
+    //console.log(refreshToken);
   });
 
   it('request on andpoint refresh-token and get 2 token, access and refresh ', async () => {
@@ -73,6 +78,10 @@ describe('tests for andpoint auth/refresh-token', () => {
       .set('Cookie', `refreshToken=${refreshToken}`)
       .expect(200);
 
-    console.log(res.body);
+    const allCookies = res.headers['set-cookie'];
+
+    //console.log(allCookies[0].split(';')[0]);
+
+    //console.log(res.body.accessToken);
   });
 });
