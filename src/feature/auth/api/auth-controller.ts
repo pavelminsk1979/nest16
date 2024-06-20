@@ -6,6 +6,7 @@ import {
   HttpStatus,
   NotFoundException,
   Post,
+  Req,
   Res,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -22,6 +23,7 @@ import { Response } from 'express';
 export class AuthController {
   constructor(protected authService: AuthService) {}
 
+  /*тут ЛОГИНИЗАЦИЯ  реализована с МУЛЬТИДЕВАЙСНОСТЬЮ*/
   @HttpCode(HttpStatus.OK)
   @Post('login')
   async handleLogin(
@@ -32,12 +34,18 @@ export class AuthController {
       await this.authService.loginUser(loginInputModel);
 
     if (result) {
+      /* { httpOnly: true, secure: true } - это опции для cookie:
+         httpOnly: true означает, что cookie будет доступно только для
+          HTTP-запросов, а не для JavaScript-скриптов на клиенте.
+         secure: true означает, что cookie будет передаваться только по
+          защищенному (HTTPS) соединению.*/
       response.cookie('refreshToken', result.refreshToken, {
         httpOnly: true,
         secure: true,
       });
       return { accessToken: result.accessToken };
     } else {
+      /* (401 Unauthorized). Это означает, что клиент не авторизован для доступа к запрашиваемому ресурсу*/
       throw new UnauthorizedException(
         "user didn't login:andpoint-post,url-auth/login",
       );
@@ -151,4 +159,20 @@ export class AuthController {
       );
     }
   }
+
+  @HttpCode(HttpStatus.OK)
+  @Post('refresh-token')
+  async handleRefreshToken(@Req() req) {
+    debugger;
+    const refreshToken = req.cookies.refreshToken;
+
+    return { token: refreshToken };
+  }
 }
+
+//.set('Cookie', `refreshToken=${refreshTokenFIRST}`)
+/*
+response.cookie('refreshToken', result.refreshToken, {
+  httpOnly: true,
+  secure: true,
+});*/

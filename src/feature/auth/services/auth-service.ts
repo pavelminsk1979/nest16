@@ -12,6 +12,11 @@ import { add } from 'date-fns';
 import { EmailSendService } from '../../../common/service/email-send-service';
 import { RegistrationConfirmationInputModel } from '../api/pipes/registration-comfirmation-input-model';
 import { NewPasswordInputModel } from '../api/pipes/new-password-input-model';
+import {
+  SecurityDevice,
+  SecurityDeviceDocument,
+} from '../../security-device/domains/domain-security-device';
+import { SecurityDeviceRepository } from '../../security-device/repositories/security-device-repository';
 
 @Injectable()
 export class AuthService {
@@ -21,6 +26,9 @@ export class AuthService {
     protected tokenJwtService: TokenJwtService,
     @InjectModel(User.name) private userModel: Model<UserDocument>,
     protected emailSendService: EmailSendService,
+    @InjectModel(SecurityDevice.name)
+    private securityDeviceModel: Model<SecurityDeviceDocument>,
+    protected securityDeviceRepository: SecurityDeviceRepository,
   ) {}
 
   async loginUser(loginInputModel: LoginInputModel) {
@@ -41,7 +49,7 @@ export class AuthService {
 
     const passwordHash = user.passwordHash;
 
-    /* делаю проверку-- на основании этого пароля 
+    /* делаю проверку-- на основании этого ли  пароля
      был создан хэш который в данном документе находится */
     const isCorrectPassword = await this.hashPasswordService.checkPassword(
       password,
@@ -72,10 +80,38 @@ export class AuthService {
 
     if (!accessToken) return null;
 
-    /* создание  refreshToken  такоеже
-     * то тех заданию ненадо делать обнавления пары
-     * токенов --надо просто вернуть 2 токена на фронтенд */
-    const refreshToken = await this.tokenJwtService.createRefreshToken(userId);
+    /*  МУЛЬТИДЕВАЙСНОСТЬ
+     один user может залогиниться на одном сайте
+     из своего телефона и плюс со своего ноутбука
+     -- логиниться будет одним и темже login and password
+     И НА РАЗНЫЙ УСТРОЙСТВА ПРИДУТ РАЗНЫЕ ПАРЫ
+     accessToken and refreshToken
+     ------ в базе надо создать коллекцию security-device*/
+
+    const deviceId = randomCode();
+
+    const { refreshToken, issuedAtRefreshToken } =
+      await this.tokenJwtService.createRefreshToken(deviceId);
+
+    /*на каждый девайс в колекции отдельный документ
+     КОГДА АКСЕССТОКЕН протухнет тогда у рефрешТокена из самого
+     токена достану deviceId и issuedAtRefreshToken И В ЛУЧШЕМ 
+     СЛУЧАЕ НАЙДУ ОДИН ДОКУМЕНТ В КОЛЕКЦИИ , и если документ есть то 
+     создам новую пару Акцес и Рефреш Токенов
+     ---userId  надо чтоб АксессТокен создавать ведь надо 
+     отдавать пару токенов на фронтенд*/
+
+    const newSecurityDevice: SecurityDeviceDocument =
+      new this.securityDeviceModel({
+        deviceId,
+        issuedAtRefreshToken,
+        userId,
+      });
+
+    const securityDevice: SecurityDeviceDocument =
+      await this.securityDeviceRepository.save(newSecurityDevice);
+
+    if (!securityDevice) return null;
 
     return { accessToken, refreshToken };
   }

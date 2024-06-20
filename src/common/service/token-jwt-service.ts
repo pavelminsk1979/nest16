@@ -9,8 +9,8 @@ export class TokenJwtService {
   expirationRefreshToken: string;
 
   constructor(private configService: ConfigService<ConfigurationType, true>) {
-    this.expirationAccessToken = '5m';
-    this.expirationRefreshToken = '500m';
+    this.expirationAccessToken = '10s';
+    this.expirationRefreshToken = '20s';
   }
 
   async createAccessToken(userId: string) {
@@ -25,16 +25,24 @@ export class TokenJwtService {
     return accessToken;
   }
 
-  async createRefreshToken(userId: string) {
+  async createRefreshToken(deviceId: string) {
+    /*внутри будет 2 значения deviceId и дата создания */
+
+    const issuedAtRefreshToken = new Date().toISOString();
+
     const secretRefreshToken = this.configService.get(
       'authSettings.RefreshTOKEN_SECRET',
       { infer: true },
     );
-    const refreshToken = jwt.sign({ userId: userId }, secretRefreshToken, {
-      expiresIn: this.expirationRefreshToken,
-    });
+    const refreshToken = jwt.sign(
+      { deviceId, issuedAtRefreshToken },
+      secretRefreshToken,
+      {
+        expiresIn: this.expirationRefreshToken,
+      },
+    );
 
-    return refreshToken;
+    return { refreshToken, issuedAtRefreshToken };
   }
 
   async checkAccessToken(token: string) {

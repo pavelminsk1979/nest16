@@ -49,6 +49,11 @@ import {
 import { LikeStatusForCommentRepository } from './feature/like-status-for-comment/repositories/like-status-for-comment-repository';
 import { DataUserExtractorFromTokenGuard } from './common/guard/data-user-extractor-from-token-guard';
 import { BlogExistsConstraint } from './common/validators/blog-exists-constraint';
+import {
+  SecurityDevice,
+  SecurityDeviceShema,
+} from './feature/security-device/domains/domain-security-device';
+import { SecurityDeviceRepository } from './feature/security-device/repositories/security-device-repository';
 
 dotenv.config();
 
@@ -179,6 +184,7 @@ dotenv.config();
       { name: Comment.name, schema: CommentShema },
       { name: LikeStatusForPost.name, schema: LikeStatusForPostShema },
       { name: LikeStatusForComment.name, schema: LikeStatusForCommentShema },
+      { name: SecurityDevice.name, schema: SecurityDeviceShema },
     ]),
   ],
   /*все контроллеры приложения должны тут добавлены */
@@ -216,6 +222,7 @@ dotenv.config();
     LikeStatusForPostRepository,
     LikeStatusForCommentRepository,
     BlogExistsConstraint,
+    SecurityDeviceRepository,
   ],
 })
 /*export class AppModule {} в данном контексте
