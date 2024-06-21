@@ -17,6 +17,7 @@ import {
   SecurityDeviceDocument,
 } from '../../security-device/domains/domain-security-device';
 import { SecurityDeviceRepository } from '../../security-device/repositories/security-device-repository';
+import { Request } from 'express';
 
 @Injectable()
 export class AuthService {
@@ -31,7 +32,7 @@ export class AuthService {
     protected securityDeviceRepository: SecurityDeviceRepository,
   ) {}
 
-  async loginUser(loginInputModel: LoginInputModel) {
+  async loginUser(loginInputModel: LoginInputModel, request: Request) {
     const { loginOrEmail, password } = loginInputModel;
 
     /*в базе должен быть документ  
@@ -101,11 +102,24 @@ export class AuthService {
      ---userId  надо чтоб АксессТокен создавать ведь надо 
      отдавать пару токенов на фронтенд*/
 
+    const ip =
+      (request.headers['x-forwarded-for'] as string) ||
+      (request.socket.remoteAddress as string);
+
+    /*ip,nameDevice--- эти две сущности понадобятся
+     * потом-- а именно когда я на фронт буду отдавать
+     * информацию о всех девайсах для одного юзера
+     * get запрос на эндпоинт security/devices */
+
+    const nameDevice = request.headers['user-agent'] || 'Some Device';
+
     const newSecurityDevice: SecurityDeviceDocument =
       new this.securityDeviceModel({
         deviceId,
         issuedAtRefreshToken,
         userId,
+        ip,
+        nameDevice,
       });
 
     const securityDevice: SecurityDeviceDocument =

@@ -54,6 +54,10 @@ import {
   SecurityDeviceShema,
 } from './feature/security-device/domains/domain-security-device';
 import { SecurityDeviceRepository } from './feature/security-device/repositories/security-device-repository';
+import { RefreshTokenGuard } from './common/guard/refresh-token-guard';
+import { SecurityDeviceController } from './feature/security-device/api/security-device-controller';
+import { SecurityDeviceService } from './feature/security-device/services/security-device-service';
+import { SecurityDeviceQueryRepository } from './feature/security-device/repositories/security-device-query-repository';
 
 dotenv.config();
 
@@ -195,6 +199,7 @@ dotenv.config();
     CommentController,
     TestController,
     AuthController,
+    SecurityDeviceController,
   ],
   /* все сервисы приложения должны тут добавлены */
   providers: [
@@ -223,6 +228,9 @@ dotenv.config();
     LikeStatusForCommentRepository,
     BlogExistsConstraint,
     SecurityDeviceRepository,
+    RefreshTokenGuard,
+    SecurityDeviceService,
+    SecurityDeviceQueryRepository,
   ],
 })
 /*export class AppModule {} в данном контексте

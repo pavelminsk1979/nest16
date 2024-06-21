@@ -12,6 +12,10 @@ export class SecurityDevice {
   issuedAtRefreshToken: string;
   @Prop({ required: true })
   userId: string;
+  @Prop({ required: true })
+  ip: string;
+  @Prop({ required: true })
+  nameDevice: string;
 }
 
 export const SecurityDeviceShema = SchemaFactory.createForClass(SecurityDevice);

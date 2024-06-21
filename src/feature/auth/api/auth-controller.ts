@@ -29,9 +29,10 @@ export class AuthController {
   async handleLogin(
     @Body() loginInputModel: LoginInputModel,
     @Res({ passthrough: true }) response: Response,
+    @Req() request: Request,
   ): Promise<{ accessToken: string } | null> {
     const result: { accessToken: string; refreshToken: string } | null =
-      await this.authService.loginUser(loginInputModel);
+      await this.authService.loginUser(loginInputModel, request);
 
     if (result) {
       /* { httpOnly: true, secure: true } - это опции для cookie:
