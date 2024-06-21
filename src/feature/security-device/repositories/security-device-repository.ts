@@ -24,6 +24,10 @@ export class SecurityDeviceRepository {
     return this.securityDeviceModel.findOne({ deviceId, issuedAtRefreshToken });
   }
 
+  async findDeviceByDeviceId(deviceId: string) {
+    return this.securityDeviceModel.findOne({ deviceId });
+  }
+
   async deleteDevicesExeptCurrentDevice(userId: string, deviceId: string) {
     /* В условии { userId, deviceId: { $ne: deviceId } } мы указываем, что нужно удалить все устройства с userId, за исключением deviceId. Оператор $ne означает "не равно", поэтому мы исключаем устройство с deviceId из удаления.*/
 
@@ -35,5 +39,15 @@ export class SecurityDeviceRepository {
     /* В случае, если не будет найдено устройств для удаления, result будет содержать объект с информацией о результате удаления, где свойство ok будет равно 1, а свойство deletedCount будет равно 0. Это означает, что операция удаления была выполнена успешно, но не было удалено ни одного документа, так как не было устройств, удовлетворяющих условию.*/
 
     return true;
+  }
+
+  async deleteDeviceByDeviceId(deviceId: string) {
+    const result = await this.securityDeviceModel.deleteOne({ deviceId });
+
+    if (result.deletedCount) {
+      return true;
+    } else {
+      return null;
+    }
   }
 }

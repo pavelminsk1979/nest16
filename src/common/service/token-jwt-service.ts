@@ -9,8 +9,8 @@ export class TokenJwtService {
   expirationRefreshToken: string;
 
   constructor(private configService: ConfigService<ConfigurationType, true>) {
-    this.expirationAccessToken = '10s';
-    this.expirationRefreshToken = '20s';
+    this.expirationAccessToken = '100s';
+    this.expirationRefreshToken = '200s';
   }
 
   async createAccessToken(userId: string) {
@@ -66,7 +66,6 @@ export class TokenJwtService {
     refreshToken: string,
   ): Promise<{ deviceId: string; issuedAtRefreshToken: string } | null> {
     try {
-      debugger;
       const secretRefreshToken = this.configService.get(
         'authSettings.RefreshTOKEN_SECRET',
         { infer: true },

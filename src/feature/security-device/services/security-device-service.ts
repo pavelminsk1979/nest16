@@ -45,4 +45,13 @@ export class SecurityDeviceService {
 
     return true;
   }
+
+  async deleteDeviceByDeviceId(deviceId: string) {
+    const device =
+      await this.securityDeviceRepository.findDeviceByDeviceId(deviceId);
+
+    if (!device) return null;
+
+    return this.securityDeviceRepository.deleteDeviceByDeviceId(deviceId);
+  }
 }

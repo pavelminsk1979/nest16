@@ -1,10 +1,12 @@
 import {
   Controller,
   Delete,
+  ForbiddenException,
   Get,
   HttpCode,
   HttpStatus,
   NotFoundException,
+  Param,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -50,5 +52,36 @@ export class SecurityDeviceController {
     );
 
     return;
+  }
+
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Delete(':deviceId')
+  async deleteDeviceByDeviceId(
+    @Req() request: Request,
+    @Param('deviceId') id: string,
+  ) {
+    const deviceId = request['deviceId'];
+
+    if (id !== deviceId) {
+      /*  403 статус код --АЙДИШКА ПРИШЛА В ПАРАМЕТРЕ 
+        И НЕ СООТВЕТСТВУЕТ ТОЙ КОТОРУЮ ДОСТАЛ ИЗ 
+        РЕФРЕШТОКЕНА*/
+      throw new ForbiddenException(
+        'id not belong to current device :andpoint-security/devices/deviceId,method-delete',
+      );
+    }
+
+    /*const issuedAtRefreshToken = request['issuedAtRefreshToken'];*/
+
+    const result =
+      await this.securityDeviceService.deleteDeviceByDeviceId(deviceId);
+
+    if (result) {
+      return;
+    } else {
+      throw new NotFoundException(
+        'security device not found:andpoint-security/devices/deviceId,method-delete',
+      );
+    }
   }
 }

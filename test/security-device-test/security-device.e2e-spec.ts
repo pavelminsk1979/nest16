@@ -10,6 +10,8 @@ describe('tests for andpoint security/devices', () => {
 
   let refreshToken;
 
+  let deviceId;
+
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
@@ -78,6 +80,14 @@ describe('tests for andpoint security/devices', () => {
         password: password1,
       })
       .expect(200);
+
+    await request(app.getHttpServer())
+      .post('/auth/login')
+      .send({
+        loginOrEmail: login1,
+        password: password1,
+      })
+      .expect(200);
   });
 
   it('get all devices', async () => {
@@ -92,6 +102,38 @@ describe('tests for andpoint security/devices', () => {
 
     //console.log(res.body.accessToken);
 
-    console.log(res.body);
+    //console.log(res.body[0].deviceId);
+
+    deviceId = res.body[0].deviceId;
+  });
+
+  it('delete all devices exept current device', async () => {
+    const res = await request(app.getHttpServer())
+      .delete('/security/devices')
+      .set('Cookie', `refreshToken=${refreshToken}`)
+      .expect(204);
+
+    const allCookies = res.headers['set-cookie'];
+
+    //console.log(allCookies[0].split(';')[0]);
+
+    //console.log(res.body.accessToken);
+
+    //.log(res.body);
+  });
+
+  it('delete  device by deviceId', async () => {
+    const res = await request(app.getHttpServer())
+      .delete(`/security/devices/${deviceId}`)
+      .set('Cookie', `refreshToken=${refreshToken}`)
+      .expect(204);
+
+    const allCookies = res.headers['set-cookie'];
+
+    //console.log(allCookies[0].split(';')[0]);
+
+    //console.log(res.body.accessToken);
+
+    //.log(res.body);
   });
 });
