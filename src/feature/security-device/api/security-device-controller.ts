@@ -33,9 +33,10 @@ export class SecurityDeviceController {
     if (result) {
       return result;
     } else {
-      throw new NotFoundException(
-        'security device not found:andpoint-security/devices,method-get',
-      );
+      /*  throw new NotFoundException(
+          'security device not found:andpoint-security/devices,method-get',
+        );*/
+      return [];
     }
   }
 

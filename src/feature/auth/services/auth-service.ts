@@ -358,4 +358,17 @@ export class AuthService {
 
     return { newAccessToken, newRefreshToken };
   }
+
+  async createViewModelForMeRequest(userId: string) {
+    const user: UserDocument | null =
+      await this.usersRepository.getUserById(userId);
+
+    if (!user) return null;
+
+    return {
+      email: user.email,
+      login: user.login,
+      userId,
+    };
+  }
 }

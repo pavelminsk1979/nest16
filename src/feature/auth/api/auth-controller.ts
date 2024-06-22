@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   NotFoundException,
@@ -9,6 +10,7 @@ import {
   Req,
   Res,
   UnauthorizedException,
+  UseGuards,
 } from '@nestjs/common';
 import { LoginInputModel } from './pipes/login-input-model';
 import { AuthService } from '../services/auth-service';
@@ -18,10 +20,17 @@ import { RegistrationEmailResendingInputModel } from './pipes/registration-email
 import { PasswordRecoveryInputModel } from './pipes/password-recovery-input-model';
 import { NewPasswordInputModel } from './pipes/new-password-input-model';
 import { Response, Request } from 'express';
+import { RefreshTokenGuard } from '../../../common/guard/refresh-token-guard';
+import { SecurityDeviceService } from '../../security-device/services/security-device-service';
+import { AuthTokenGuard } from '../../../common/guard/auth-token-guard';
+import { ViewForMeRequest } from './types/view';
 
 @Controller('auth')
 export class AuthController {
-  constructor(protected authService: AuthService) {}
+  constructor(
+    protected authService: AuthService,
+    protected securityDeviceService: SecurityDeviceService,
+  ) {}
 
   /*тут ЛОГИНИЗАЦИЯ  реализована с МУЛЬТИДЕВАЙСНОСТЬЮ*/
   @HttpCode(HttpStatus.OK)
@@ -187,6 +196,46 @@ export class AuthController {
       /* (401 Unauthorized). Это означает, что клиент не авторизован для доступа к запрашиваемому ресурсу*/
       throw new UnauthorizedException(
         "user didn't login:andpoint-post,url-auth/login",
+      );
+    }
+  }
+
+  @UseGuards(RefreshTokenGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Post('logout')
+  async handleLogout(@Req() request: Request) {
+    const deviceId = request['deviceId'];
+
+    const issuedAtRefreshToken = request['issuedAtRefreshToken'];
+
+    const result = await this.securityDeviceService.logout(
+      deviceId,
+      issuedAtRefreshToken,
+    );
+
+    if (result) {
+      return;
+    } else {
+      throw new NotFoundException(
+        "user didn't logout:andpoint-auth/logout,method - post",
+      );
+    }
+  }
+
+  @UseGuards(AuthTokenGuard)
+  @HttpCode(HttpStatus.OK)
+  @Get('me')
+  async handleMe(@Req() request: Request) {
+    const userId = request['userId'];
+
+    const result: ViewForMeRequest | null =
+      await this.authService.createViewModelForMeRequest(userId);
+
+    if (result) {
+      return result;
+    } else {
+      throw new NotFoundException(
+        "user didn't logout:andpoint-auth/me,method - get",
       );
     }
   }

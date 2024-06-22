@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { SecurityDeviceRepository } from '../repositories/security-device-repository';
 import { SecurityDeviceQueryRepository } from '../repositories/security-device-query-repository';
 
@@ -52,6 +56,20 @@ export class SecurityDeviceService {
 
     if (!device) return null;
 
+    return this.securityDeviceRepository.deleteDeviceByDeviceId(deviceId);
+  }
+
+  async logout(deviceId: string, issuedAtRefreshToken: string) {
+    const oneDevice = await this.securityDeviceRepository.findDeviceByIdAndDate(
+      deviceId,
+      issuedAtRefreshToken,
+    );
+
+    if (!oneDevice) {
+      throw new UnauthorizedException(
+        "user didn't logout because refreshToken not exist in BD :andpoint-auth/logout,method - post",
+      );
+    }
     return this.securityDeviceRepository.deleteDeviceByDeviceId(deviceId);
   }
 }
