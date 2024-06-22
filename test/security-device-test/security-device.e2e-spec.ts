@@ -122,6 +122,15 @@ describe('tests for andpoint security/devices', () => {
     //.log(res.body);
   });
 
+  const deviceIdBad = 'deviceIdBad';
+
+  it('delete  device by deviceId', async () => {
+    const res = await request(app.getHttpServer())
+      .delete(`/security/devices/${deviceIdBad}`)
+      .set('Cookie', `refreshToken=${refreshToken}`)
+      .expect(403);
+  });
+
   it('delete  device by deviceId', async () => {
     const res = await request(app.getHttpServer())
       .delete(`/security/devices/${deviceId}`)

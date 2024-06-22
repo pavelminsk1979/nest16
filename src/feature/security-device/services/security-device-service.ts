@@ -1,6 +1,6 @@
 import {
+  ForbiddenException,
   Injectable,
-  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { SecurityDeviceRepository } from '../repositories/security-device-repository';
@@ -50,13 +50,46 @@ export class SecurityDeviceService {
     return true;
   }
 
-  async deleteDeviceByDeviceId(deviceId: string) {
+  async deleteDeviceByDeviceId(
+    deviceIdFromRefreshToken: string,
+    deviceIdFromParam: string,
+  ) {
     const device =
-      await this.securityDeviceRepository.findDeviceByDeviceId(deviceId);
+      await this.securityDeviceRepository.findDeviceByDeviceId(
+        deviceIdFromParam,
+      );
 
-    if (!device) return null;
+    if (!device) return null; //404
 
-    return this.securityDeviceRepository.deleteDeviceByDeviceId(deviceId);
+    /*   чтобы достать userId ТОГО 
+       ПОЛЬЗОВАТЕЛЯ КОТОРЫЙ ДЕЛАЕТ ЗАПРОС 
+       мне надо найти документ  по deviceIdFromRefreshToen*/
+
+    const deviceCurrentUser =
+      await this.securityDeviceRepository.findDeviceByDeviceId(
+        deviceIdFromRefreshToken,
+      );
+
+    if (!deviceCurrentUser) return null; //404
+
+    const userId = deviceCurrentUser.userId;
+
+    const correctDevice =
+      await this.securityDeviceRepository.findDeviceByUserIdAndDeviceIdFromParam(
+        userId,
+        deviceIdFromParam,
+      );
+
+    if (!correctDevice) {
+      /*   403 статус код */
+      throw new ForbiddenException(
+        ' not delete device :andpoint-security/devices/deviceId,method-delete',
+      );
+    }
+
+    return this.securityDeviceRepository.deleteDeviceByDeviceId(
+      deviceIdFromParam,
+    );
   }
 
   async logout(deviceId: string, issuedAtRefreshToken: string) {

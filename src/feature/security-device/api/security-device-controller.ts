@@ -1,7 +1,6 @@
 import {
   Controller,
   Delete,
-  ForbiddenException,
   Get,
   HttpCode,
   HttpStatus,
@@ -59,23 +58,18 @@ export class SecurityDeviceController {
   @Delete(':deviceId')
   async deleteDeviceByDeviceId(
     @Req() request: Request,
-    @Param('deviceId') id: string,
+    @Param('deviceId') deviceIdFromParam: string,
   ) {
-    const deviceId = request['deviceId'];
+    /*  это защищенный эндпоинт и гард проверяет рефрешТокен
+      из куки(гард повешен на весь КОНТРОЛЛЕР)
+      ТАКЖЕ В ГАРДЕ поместил deviceId в  request*/
 
-    if (id !== deviceId) {
-      /*  403 статус код --АЙДИШКА ПРИШЛА В ПАРАМЕТРЕ 
-        И НЕ СООТВЕТСТВУЕТ ТОЙ КОТОРУЮ ДОСТАЛ ИЗ 
-        РЕФРЕШТОКЕНА*/
-      throw new ForbiddenException(
-        'id not belong to current device :andpoint-security/devices/deviceId,method-delete',
-      );
-    }
+    const deviceIdFromRefreshToen = request['deviceId'];
 
-    /*const issuedAtRefreshToken = request['issuedAtRefreshToken'];*/
-
-    const result =
-      await this.securityDeviceService.deleteDeviceByDeviceId(deviceId);
+    const result = await this.securityDeviceService.deleteDeviceByDeviceId(
+      deviceIdFromRefreshToen,
+      deviceIdFromParam,
+    );
 
     if (result) {
       return;

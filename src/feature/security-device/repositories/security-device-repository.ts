@@ -50,4 +50,14 @@ export class SecurityDeviceRepository {
       return null;
     }
   }
+
+  async findDeviceByUserIdAndDeviceIdFromParam(
+    userId: string,
+    deviceIdFromParam: string,
+  ) {
+    return this.securityDeviceModel.findOne({
+      userId,
+      deviceId: deviceIdFromParam,
+    });
+  }
 }
