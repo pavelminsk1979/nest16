@@ -58,6 +58,13 @@ import { RefreshTokenGuard } from './common/guard/refresh-token-guard';
 import { SecurityDeviceController } from './feature/security-device/api/security-device-controller';
 import { SecurityDeviceService } from './feature/security-device/services/security-device-service';
 import { SecurityDeviceQueryRepository } from './feature/security-device/repositories/security-device-query-repository';
+import { VisitLimitGuard } from './common/guard/visit-limit-guard';
+import {
+  LimitVisit,
+  LimitVisitSchema,
+} from './feature/visit-limit/domains/domain-limit-visit';
+import { LimitVisitService } from './feature/visit-limit/services/limit-visit-service';
+import { LimitVisitRepository } from './feature/visit-limit/repositories/limit-visit-repository';
 
 dotenv.config();
 
@@ -189,6 +196,7 @@ dotenv.config();
       { name: LikeStatusForPost.name, schema: LikeStatusForPostShema },
       { name: LikeStatusForComment.name, schema: LikeStatusForCommentShema },
       { name: SecurityDevice.name, schema: SecurityDeviceShema },
+      { name: LimitVisit.name, schema: LimitVisitSchema },
     ]),
   ],
   /*все контроллеры приложения должны тут добавлены */
@@ -231,6 +239,9 @@ dotenv.config();
     RefreshTokenGuard,
     SecurityDeviceService,
     SecurityDeviceQueryRepository,
+    VisitLimitGuard,
+    LimitVisitService,
+    LimitVisitRepository,
   ],
 })
 /*export class AppModule {} в данном контексте

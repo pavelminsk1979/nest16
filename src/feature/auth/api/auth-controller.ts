@@ -24,6 +24,7 @@ import { RefreshTokenGuard } from '../../../common/guard/refresh-token-guard';
 import { SecurityDeviceService } from '../../security-device/services/security-device-service';
 import { AuthTokenGuard } from '../../../common/guard/auth-token-guard';
 import { ViewForMeRequest } from './types/view';
+import { VisitLimitGuard } from '../../../common/guard/visit-limit-guard';
 
 @Controller('auth')
 export class AuthController {
@@ -31,6 +32,8 @@ export class AuthController {
     protected authService: AuthService,
     protected securityDeviceService: SecurityDeviceService,
   ) {}
+
+  @UseGuards(VisitLimitGuard)
 
   /*тут ЛОГИНИЗАЦИЯ  реализована с МУЛЬТИДЕВАЙСНОСТЬЮ*/
   @HttpCode(HttpStatus.OK)
@@ -62,6 +65,7 @@ export class AuthController {
     }
   }
 
+  @UseGuards(VisitLimitGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   @Post('registration')
   async handleRegistration(
@@ -82,6 +86,7 @@ export class AuthController {
     }
   }
 
+  @UseGuards(VisitLimitGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   @Post('registration-confirmation')
   async handleRegistrationConfirmation(
@@ -104,6 +109,7 @@ export class AuthController {
     }
   }
 
+  @UseGuards(VisitLimitGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   @Post('registration-email-resending')
   async handleRegistrationEmailResending(
@@ -128,6 +134,7 @@ export class AuthController {
     }
   }
 
+  @UseGuards(VisitLimitGuard)
   /*1003 конспект- дошанка*/
   @HttpCode(HttpStatus.NO_CONTENT)
   @Post('password-recovery')
@@ -148,6 +155,7 @@ export class AuthController {
     }
   }
 
+  @UseGuards(VisitLimitGuard)
   /*новый пароль... и в базу данных помещаю
 ХЭШНОВОГОПАРОЛЯ(passwordHash).  В теле запроса приходит КОД и новый пароль*/
   @HttpCode(HttpStatus.NO_CONTENT)
