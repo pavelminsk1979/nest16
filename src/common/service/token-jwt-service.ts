@@ -9,7 +9,7 @@ export class TokenJwtService {
   expirationRefreshToken: string;
 
   constructor(private configService: ConfigService<ConfigurationType, true>) {
-    this.expirationAccessToken = '5s';
+    this.expirationAccessToken = '10s';
     this.expirationRefreshToken = '20s';
   }
 
