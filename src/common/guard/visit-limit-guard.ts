@@ -23,7 +23,7 @@ export class VisitLimitGuard implements CanActivate {
       (request.headers['x-forwarded-for'] as string) ||
       (request.socket.remoteAddress as string);
 
-    const url = request.baseUrl;
+    const url = request.originalUrl;
 
     const date = new Date().toISOString();
 
